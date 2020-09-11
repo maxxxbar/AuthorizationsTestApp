@@ -7,10 +7,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
+import com.worldshine.authorizationstestapp.api.ApiService
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    private var compositeDisposable = CompositeDisposable()
     private var emailsArr = mutableListOf<String>()
     private val testText = "qwe@qwe.qwe"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,45 +25,108 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         textViewCreate.visibility = View.GONE
         emailsArr.add(testText)
-
+        activityMainTextInputLayoutPassword.setEndIconOnClickListener {
+            Toast.makeText(
+                applicationContext,
+                getString(R.string.password_error),
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     fun onCLickButton(view: View) {
-        val email = activityMainTextfieldEmail.text?.trim().toString()
+        val email =
+            activityMainTextfieldEmail.text?.trim().toString().toLowerCase(Locale.getDefault())
         val password = activityMainTextfieldPassword.text?.trim().toString()
-
-        if (email.isNotEmpty() && password.isNotEmpty()) {
-            var s = ""
-            for (q in emailsArr) {
-                if (q == email) {
-                    s = q
-                }
+        activityMainTextInputLayoutEmail.error = null
+        activityMainTextInputLayoutPassword.error = null
+        if (email.isEmpty() || password.isEmpty() || !email.isValidEmail() || !password.isValidPassword()) {
+            if (email.isEmpty()) {
+                activityMainTextInputLayoutEmail.error = getString(R.string.email_empty)
+            } else if (!email.isValidEmail()) {
+                activityMainTextInputLayoutEmail.error = getString(R.string.email_error)
             }
-            if (s.isNotEmpty()) {
-                Toast.makeText(this, "Email: $email Есть в массиве", Toast.LENGTH_SHORT).show()
+            if (password.isEmpty()) {
+                activityMainTextInputLayoutPassword.error = getString(R.string.password_empty)
+            } else if (!password.isValidPassword()) {
+                activityMainTextInputLayoutPassword.error = getString(R.string.password_error)
+            }
+        } else if (email.isNotEmpty() && password.isNotEmpty() && email.isValidEmail() && password.isValidPassword()) {
+            if (findEmailInArray(email)) {
                 textViewCreate.visibility = View.GONE
             } else {
-                Toast.makeText(this, "Email: $email нет массиве", Toast.LENGTH_SHORT).show()
                 textViewCreate.visibility = View.VISIBLE
             }
+            hideKeyboard()
+            val disposable = ApiService.create.getForecast()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    createSnackbar(
+                        findViewById(android.R.id.content),
+                        String.format(
+                            getString(R.string.saransk),
+                            it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt()
+                                .toString()
+                        )
+                    )
+                }, {
+                    Toast.makeText(this, "${it.message}", Toast.LENGTH_LONG).show()
+                })
+            compositeDisposable.add(disposable)
         }
     }
 
     fun onClickCreate(view: View) {
-        val email = activityMainTextfieldEmail.text?.trim().toString()
-        val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(buttonDo.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
-        emailsArr.add(email)
-        view.visibility = View.GONE
-/*
-        Toast.makeText(this, "Email: $email успешно добавлен", Toast.LENGTH_SHORT).show()
-*/
-        Snackbar.make(
-            findViewById<View>(android.R.id.content),
-            "Email: $email успешно добавлен",
-            Snackbar.LENGTH_LONG
-        ).show()
+        val email =
+            activityMainTextfieldEmail.text?.trim().toString().toLowerCase(Locale.getDefault())
+        hideKeyboard()
+        if (findEmailInArray(email)) {
+            view.visibility = View.GONE
+            createSnackbar(view, String.format(getString(R.string.email_alread_exists), email))
+        } else if (email.isNotEmpty() && email.isValidEmail()) {
+            emailsArr.add(email)
+            view.visibility = View.GONE
+            createSnackbar(view, String.format(getString(R.string.email_successfully_added), email))
+        }
     }
+
+    private fun hideKeyboard() {
+        val imm: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(buttonDo.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+
+    private fun findEmailInArray(email: String): Boolean {
+        for (q in emailsArr) {
+            if (q == email) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (!compositeDisposable.isDisposed) {
+            compositeDisposable.dispose()
+        }
+    }
+}
+
+fun createSnackbar(view: View, text: String, length: Int = Snackbar.LENGTH_SHORT) {
+    Snackbar.make(view, text, length).show()
+}
+
+fun String.isValidEmail(): Boolean {
+    val reg =
+        Regex(pattern = "[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+    return reg.containsMatchIn(this)
+}
+
+fun String.isValidPassword(): Boolean {
+    val reg = Regex(pattern = "^(?=.*\\d)(?=.*[a-zа-яё])(?=.*[A-ZА-ЯЁ])(?=.*[A-ZА-ЯЁ]).{6,}\$")
+    return reg.containsMatchIn(this)
 }
 
 

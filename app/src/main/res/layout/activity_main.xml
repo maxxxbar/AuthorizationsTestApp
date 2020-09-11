@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:orientation="vertical"
     android:touchscreenBlocksFocus="true"
     tools:context=".MainActivity">
 
@@ -36,6 +36,7 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
+                    android:contentDescription="@string/activity_main_back_button"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -51,7 +52,7 @@
                     android:fontFamily="sans-serif"
                     android:letterSpacing="0.01"
                     android:lineSpacingExtra="8sp"
-                    android:text="Авторизация "
+                    android:text="@string/activity_main_authorization_textview"
                     android:textColor="@color/toolbarBackgroundTitleTextColor"
                     android:textSize="20sp"
                     android:textStyle="normal"
@@ -69,8 +70,8 @@
                     android:fontFamily="sans-serif-medium"
                     android:gravity="end"
                     android:lineSpacingExtra="13sp"
-                    android:text="СОЗДАТЬ"
                     android:onClick="onClickCreate"
+                    android:text="@string/activity_main_create_textview"
                     android:textColor="#8900a8"
                     android:textSize="15sp"
                     android:textStyle="normal"
@@ -96,7 +97,7 @@
             android:id="@+id/activityMainTextfieldEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Электронная почта"
+            android:hint="@string/activity_main_email_textfield_hint"
             android:inputType="textEmailSubject" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -106,13 +107,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="32dp">
+        android:layout_marginEnd="32dp"
+        app:endIconContentDescription="Test"
+        app:endIconDrawable="@android:drawable/ic_menu_info_details"
+        app:endIconMode="custom"
+        app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/activityMainTextfieldPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Пароль"
+            android:hint="@string/activity_main_password_textfield_hint"
+
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -127,7 +133,7 @@
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.04"
         android:onClick="onCLickButton"
-        android:text="Войти"
+        android:text="@string/activity_main_buttonDo_text"
         android:textColor="#ffffff"
         android:textSize="14sp"
         android:textStyle="normal" />
