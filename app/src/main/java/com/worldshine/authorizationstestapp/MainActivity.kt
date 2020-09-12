@@ -6,23 +6,22 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
-import com.worldshine.authorizationstestapp.api.ApiService
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var compositeDisposable = CompositeDisposable()
+    private lateinit var viewModel: MainActivityViewModel
     private var emailsArr = mutableListOf<String>()
     private val testText = "qwe@qwe.qwe"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+            .create(MainActivityViewModel::class.java)
         textViewCreate.visibility = View.GONE
         emailsArr.add(testText)
         activityMainTextInputLayoutPassword.setEndIconOnClickListener {
@@ -63,25 +62,20 @@ class MainActivity : AppCompatActivity() {
                 textViewCreate.visibility = View.VISIBLE
             }
             hideKeyboard()
-            val disposable = ApiService.create.getForecast()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    val forecast = it.let {
-                        it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt().toString()
-                    }
-                    createSnackbar(
-                        findViewById(android.R.id.content),
-                        String.format(
-                            getString(R.string.saransk),
-                            forecast
-                        )
+            viewModel.getWeather().observe(this, {
+                val forecast =
+                    it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt().toString()
+                createSnackbar(
+                    findViewById(android.R.id.content),
+                    String.format(
+                        getString(R.string.saransk),
+                        forecast
                     )
-                }, {
-
-                    Toast.makeText(this, "${it.message}", Toast.LENGTH_LONG).show()
-                })
-            compositeDisposable.add(disposable)
+                )
+            })
+            viewModel.error.observe(this, { error ->
+                    Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+            })
         }
     }
 
@@ -112,19 +106,11 @@ class MainActivity : AppCompatActivity() {
         }
         return false
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!compositeDisposable.isDisposed) {
-            compositeDisposable.dispose()
-        }
-    }
 }
 
 fun createSnackbar(view: View, text: String, length: Int = Snackbar.LENGTH_SHORT) {
     Snackbar.make(view, text, length).show()
 }
-
 
 fun String.isValidEmail(): Boolean {
     val reg =
