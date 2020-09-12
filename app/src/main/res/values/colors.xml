@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimary">#4680ff</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#8f8f8f</color>
     <color name="statusBarColor">#f4f4f4</color>
     <color name="toolbarBackground">#f9f9f9</color>
     <color name="toolbarBackgroundTitleTextColor">#3d3d3d</color>
+    <color name="buttonDoBackground">#8900a8</color>
+
 </resources>

@@ -32,6 +32,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+        mainLayout.setOnTouchListener { view, _ ->
+            view.performClick()
+            hideKeyboard()
+            return@setOnTouchListener true
+        }
     }
 
     fun onCLickButton(view: View) {
@@ -62,15 +67,18 @@ class MainActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
+                    val forecast = it.let {
+                        it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt().toString()
+                    }
                     createSnackbar(
                         findViewById(android.R.id.content),
                         String.format(
                             getString(R.string.saransk),
-                            it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt()
-                                .toString()
+                            forecast
                         )
                     )
                 }, {
+
                     Toast.makeText(this, "${it.message}", Toast.LENGTH_LONG).show()
                 })
             compositeDisposable.add(disposable)
@@ -92,9 +100,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hideKeyboard() {
-        val imm: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(buttonDo.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(mainLayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }
 
     private fun findEmailInArray(email: String): Boolean {
@@ -118,15 +125,16 @@ fun createSnackbar(view: View, text: String, length: Int = Snackbar.LENGTH_SHORT
     Snackbar.make(view, text, length).show()
 }
 
+
 fun String.isValidEmail(): Boolean {
     val reg =
         Regex(pattern = "[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-    return reg.containsMatchIn(this)
+    return reg.matches(this)
 }
 
 fun String.isValidPassword(): Boolean {
     val reg = Regex(pattern = "^(?=.*\\d)(?=.*[a-zа-яё])(?=.*[A-ZА-ЯЁ])(?=.*[A-ZА-ЯЁ]).{6,}\$")
-    return reg.containsMatchIn(this)
+    return reg.matches(this)
 }
 
 
