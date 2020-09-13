@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Authorizations Test App</string>
+    <string name="password_error">Пароль должен содержать минимум 6 символов,минимум 1 строчную букву, 1 заглавную, и 1 цифру.</string>
+    <string name="password_empty">Поле пароль не должно быть пустое</string>
+    <string name="email_empty">Поле адрес электронной почты не должно быть пустое</string>
+    <string name="email_error">Адрес электронной почты указан неверно. Пример: example@example.com</string>
+    <string name="saransk">Саранск, температура днем: %1$s градусов</string>
+    <string name="email_alread_exists">Email: %1$s уже существует</string>
+    <string name="email_successfully_added">Email: %1$s успешно добавлен</string>
+    <string name="activity_main_back_button">Кнопка назад</string>
+    <string name="activity_main_authorization_textview">Авторизация</string>
+    <string name="activity_main_create_textview">СОЗДАТЬ</string>
+    <string name="activity_main_email_textfield_hint">Электронная почта</string>
+    <string name="activity_main_password_textfield_hint">Пароль</string>
+    <string name="activity_main_buttonDo_text">Войти</string>
 </resources>

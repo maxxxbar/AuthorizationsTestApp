@@ -1,0 +1,117 @@
+package com.worldshine.authorizationstestapp.ui.mainactivity
+
+import android.content.Context
+import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.worldshine.authorizationstestapp.R
+import com.worldshine.authorizationstestapp.utils.createSnackbar
+import com.worldshine.authorizationstestapp.utils.isValidEmail
+import com.worldshine.authorizationstestapp.utils.isValidPassword
+import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
+
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var viewModel: MainActivityViewModel
+    private var emailsArr = mutableListOf<String>()
+    private val testText = "qwe@qwe.qwe"
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+            .create(MainActivityViewModel::class.java)
+        textViewCreate.visibility = View.GONE
+        emailsArr.add(testText)
+        activityMainTextInputLayoutPassword.setEndIconOnClickListener {
+            Toast.makeText(
+                applicationContext,
+                getString(R.string.password_error),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        mainLayout.setOnTouchListener { view, _ ->
+            view.performClick()
+            hideKeyboard()
+            return@setOnTouchListener true
+        }
+    }
+
+    fun onCLickButton(view: View) {
+        val email =
+            activityMainTextfieldEmail.text?.trim().toString().toLowerCase(Locale.getDefault())
+        val password = activityMainTextfieldPassword.text?.trim().toString()
+        activityMainTextInputLayoutEmail.error = null
+        activityMainTextInputLayoutPassword.error = null
+        if (email.isEmpty() || password.isEmpty() || !email.isValidEmail() || !password.isValidPassword()) {
+            if (email.isEmpty()) {
+                activityMainTextInputLayoutEmail.error = getString(R.string.email_empty)
+            } else if (!email.isValidEmail()) {
+                activityMainTextInputLayoutEmail.error = getString(R.string.email_error)
+            }
+            if (password.isEmpty()) {
+                activityMainTextInputLayoutPassword.error = getString(R.string.password_empty)
+            } else if (!password.isValidPassword()) {
+                activityMainTextInputLayoutPassword.error = getString(R.string.password_error)
+            }
+        } else if (email.isNotEmpty() && password.isNotEmpty() && email.isValidEmail() && password.isValidPassword()) {
+            if (findEmailInArray(email)) {
+                textViewCreate.visibility = View.GONE
+            } else {
+                textViewCreate.visibility = View.VISIBLE
+            }
+            hideKeyboard()
+            viewModel.getWeather().observe(this, {
+                val forecast =
+                    it.dailyForecasts?.get(0)?.temperature?.maximum?.value?.toInt().toString()
+                createSnackbar(
+                    findViewById(android.R.id.content),
+                    String.format(
+                        getString(R.string.saransk),
+                        forecast
+                    )
+                )
+            })
+            viewModel.error.observe(this, { error ->
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+            })
+        }
+    }
+
+    fun onClickCreate(view: View) {
+        val email =
+            activityMainTextfieldEmail.text?.trim().toString().toLowerCase(Locale.getDefault())
+        hideKeyboard()
+        if (findEmailInArray(email)) {
+            view.visibility = View.GONE
+            createSnackbar(view, String.format(getString(R.string.email_alread_exists), email))
+        } else if (email.isNotEmpty() && email.isValidEmail()) {
+            emailsArr.add(email)
+            view.visibility = View.GONE
+            createSnackbar(view, String.format(getString(R.string.email_successfully_added), email))
+        }
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(mainLayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+
+    private fun findEmailInArray(email: String): Boolean {
+        for (q in emailsArr) {
+            if (q == email) {
+                return true
+            }
+        }
+        return false
+    }
+}
+
+
+
+
+
