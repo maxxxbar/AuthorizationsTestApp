@@ -1,9 +1,8 @@
-package com.worldshine.authorizationstestapp
+package com.worldshine.authorizationstestapp.ui.mainactivity
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.worldshine.authorizationstestapp.api.ApiService
 import com.worldshine.authorizationstestapp.pojo.Response
 import com.worldshine.authorizationstestapp.utils.SingleLiveEvent
@@ -31,10 +30,6 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             })
         compositeDisposable.add(disposable)
         return data
-    }
-
-    fun clearError() {
-        error.value = null
     }
 
     override fun onCleared() {

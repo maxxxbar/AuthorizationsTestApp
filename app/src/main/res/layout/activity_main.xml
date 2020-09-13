@@ -10,7 +10,7 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical"
     android:touchscreenBlocksFocus="true"
-    tools:context=".MainActivity">
+    tools:context=".ui.mainactivity.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"

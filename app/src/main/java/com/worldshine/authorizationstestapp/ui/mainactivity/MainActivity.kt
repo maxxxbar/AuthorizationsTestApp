@@ -1,4 +1,4 @@
-package com.worldshine.authorizationstestapp
+package com.worldshine.authorizationstestapp.ui.mainactivity
 
 import android.content.Context
 import android.os.Bundle
@@ -7,7 +7,10 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.snackbar.Snackbar
+import com.worldshine.authorizationstestapp.R
+import com.worldshine.authorizationstestapp.utils.createSnackbar
+import com.worldshine.authorizationstestapp.utils.isValidEmail
+import com.worldshine.authorizationstestapp.utils.isValidPassword
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -74,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 )
             })
             viewModel.error.observe(this, { error ->
-                    Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
             })
         }
     }
@@ -108,20 +111,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-fun createSnackbar(view: View, text: String, length: Int = Snackbar.LENGTH_SHORT) {
-    Snackbar.make(view, text, length).show()
-}
-
-fun String.isValidEmail(): Boolean {
-    val reg =
-        Regex(pattern = "[a-z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#\$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-    return reg.matches(this)
-}
-
-fun String.isValidPassword(): Boolean {
-    val reg = Regex(pattern = "^(?=.*\\d)(?=.*[a-zа-яё])(?=.*[A-ZА-ЯЁ])(?=.*[A-ZА-ЯЁ]).{6,}\$")
-    return reg.matches(this)
-}
 
 
 
